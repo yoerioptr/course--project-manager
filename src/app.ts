@@ -1,3 +1,36 @@
+class ProjectState {
+    private listeners: any[] = [];
+    private projects: any[] = [];
+    private static instance: ProjectState;
+
+    private constructor() {
+    }
+
+    static getInstance() {
+        this.instance ??= new ProjectState();
+        return this.instance;
+    }
+
+    addListener(listenerFunction: Function) {
+        this.listeners.push(listenerFunction);
+    }
+
+    addProject(title: string, description: string, numberOfPeople: number) {
+        this.projects.push({
+            id: Math.random().toString(),
+            title: title,
+            description: description,
+            people: numberOfPeople
+        });
+
+        for (const listnerFunction of this.listeners) {
+            listnerFunction(this.projects.slice());
+        }
+    }
+}
+
+const projectState = ProjectState.getInstance();
+
 interface Validatable {
     value: string | number;
     required?: boolean;
@@ -57,6 +90,7 @@ class ProjectList {
     templateElement: HTMLTemplateElement;
     hostElement: HTMLDivElement;
     element: HTMLElement;
+    assignedProjects: any[] = [];
 
     constructor(private type: 'active' | 'finished') {
         this.templateElement = document.getElementById('project-list')! as HTMLTemplateElement;
@@ -66,8 +100,22 @@ class ProjectList {
         this.element = importedNode.firstElementChild as HTMLElement;
         this.element.id = `${this.type}-projects`;
 
+        projectState.addListener((projects: any[]) => {
+            this.assignedProjects = projects;
+            this.renderProjects();
+        });
+
         this.attach();
         this.renderContent();
+    }
+
+    private renderProjects() {
+        const listElement = document.getElementById(`${this.type}-project-list`)! as HTMLUListElement;
+        for (const projectItem of this.assignedProjects) {
+            const listItem = document.createElement('li');
+            listItem.textContent = projectItem.title;
+            listElement.appendChild(listItem);
+        }
     }
 
     private renderContent() {
@@ -147,7 +195,7 @@ class ProjectInput {
         const userInput = this.gatherUserInput();
         if (Array.isArray(userInput)) {
             const [title, description, people] = userInput;
-            console.log(title, description, people);
+            projectState.addProject(title, description, people);
             this.clearInputs();
         }
     }
