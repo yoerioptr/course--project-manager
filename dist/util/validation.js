@@ -1,0 +1,24 @@
+export function validate(validatableInput) {
+    if (validatableInput.required && validatableInput.value.toString().trim().length === 0) {
+        return false;
+    }
+    if (validatableInput.minLength != null &&
+        typeof validatableInput.value === 'string' &&
+        validatableInput.value.length < validatableInput.minLength) {
+        return false;
+    }
+    if (validatableInput.maxLength != null &&
+        typeof validatableInput.value === 'string' &&
+        validatableInput.value.length > validatableInput.maxLength) {
+        return false;
+    }
+    if (validatableInput.min != null &&
+        typeof validatableInput.value === 'number' &&
+        validatableInput.value < validatableInput.min) {
+        return false;
+    }
+    return !(validatableInput.max != null &&
+        typeof validatableInput.value === 'number' &&
+        validatableInput.value > validatableInput.max);
+}
+//# sourceMappingURL=validation.js.map
