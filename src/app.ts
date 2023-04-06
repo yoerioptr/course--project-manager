@@ -1,15 +1,15 @@
 interface Draggable {
     dragStartHandler(event: DragEvent): void;
 
-    dragEndHandler(event: DragTarget): void;
+    dragEndHandler(event: DragEvent): void;
 }
 
 interface DragTarget {
-    dragOverHandler(event: DragTarget): void;
+    dragOverHandler(event: DragEvent): void;
 
-    dropHandler(event: DragTarget): void;
+    dropHandler(event: DragEvent): void;
 
-    dragLeaveHandler(event: DragTarget): void;
+    dragLeaveHandler(event: DragEvent): void;
 }
 
 enum ProjectStatus {Active, Finished}
@@ -179,14 +179,14 @@ class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> implements 
     }
 
     @autobind
-    dragStartHandler(event: DragEvent): void {
+    dragStartHandler(_: DragEvent): void {
     }
 
-    dragEndHandler(event: DragTarget): void {
+    dragEndHandler(_: DragEvent): void {
     }
 }
 
-class ProjectList extends Component<HTMLDivElement, HTMLElement> {
+class ProjectList extends Component<HTMLDivElement, HTMLElement> implements DragTarget {
     assignedProjects: Project[] = [];
 
     constructor(private type: 'active' | 'finished') {
@@ -201,12 +201,31 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement> {
     }
 
     configure() {
+        this.element.addEventListener('dragover', this.dragOverHandler);
+        this.element.addEventListener('dragleave', this.dragLeaveHandler);
+        this.element.addEventListener('drop', this.dropHandler);
+
         projectState.addListener((projects: Project[]) => {
             this.assignedProjects = projects.filter(project => {
                 return project.status === (this.type === 'active' ? ProjectStatus.Active : ProjectStatus.Finished);
             });
             this.renderProjects();
         });
+    }
+
+    @autobind
+    dragOverHandler(_: DragEvent) {
+        const listElement = this.element.querySelector('ul')!;
+        listElement.classList.add('droppable');
+    }
+
+    dropHandler(_: DragEvent) {
+    }
+
+    @autobind
+    dragLeaveHandler(_: DragEvent) {
+        const listElement = this.element.querySelector('ul')!;
+        listElement.classList.remove('droppable');
     }
 
     private renderProjects() {
