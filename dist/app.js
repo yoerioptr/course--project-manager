@@ -74,22 +74,17 @@ function validate(validatableInput) {
         validatableInput.value < validatableInput.min) {
         return false;
     }
-    if (validatableInput.max != null &&
+    return !(validatableInput.max != null &&
         typeof validatableInput.value === 'number' &&
-        validatableInput.value > validatableInput.max) {
-        return false;
-    }
-    return true;
+        validatableInput.value > validatableInput.max);
 }
 function autobind(_, _2, descriptor) {
-    const originalMethod = descriptor.value;
-    const adjustedDescriptor = {
+    return {
         configurable: true,
         get() {
-            return originalMethod.bind(this);
+            return descriptor.value.bind(this);
         }
     };
-    return adjustedDescriptor;
 }
 class Component {
     constructor(templateId, hostElementId, newElementId, insertAtStart = true) {
