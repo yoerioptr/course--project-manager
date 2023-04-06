@@ -117,7 +117,9 @@ class ProjectItem extends Component {
         this.element.querySelector('h3').textContent = `${this.persons} assigned`;
         this.element.querySelector('p').textContent = this.project.description;
     }
-    dragStartHandler(_) {
+    dragStartHandler(event) {
+        event.dataTransfer.setData('text/plain', this.project.id);
+        event.dataTransfer.effectAllowed = 'move';
     }
     dragEndHandler(_) {
     }
@@ -148,11 +150,16 @@ class ProjectList extends Component {
             this.renderProjects();
         });
     }
-    dragOverHandler(_) {
+    dragOverHandler(event) {
+        if (!event.dataTransfer || event.dataTransfer.types[0] !== 'text/plain') {
+            return;
+        }
+        event.preventDefault();
         const listElement = this.element.querySelector('ul');
         listElement.classList.add('droppable');
     }
-    dropHandler(_) {
+    dropHandler(event) {
+        console.log(event);
     }
     dragLeaveHandler(_) {
         const listElement = this.element.querySelector('ul');
